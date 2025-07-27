@@ -9,6 +9,9 @@
       padding: 0;
       overflow: hidden;
       background-color: #222;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      color: #fff;
     }
     #battlefield {
       position: fixed;
@@ -17,7 +20,10 @@
       width: 100vw;
       height: 100vh;
       background: linear-gradient(to right, red 50%, blue 50%);
-      cursor: crosshair;
+      cursor: default; /* обычный курсор */
+      overflow: hidden;
+      padding-bottom: 80px; /* место для панели оружия */
+      box-sizing: border-box;
     }
     .city {
       position: absolute;
@@ -31,8 +37,13 @@
       position: absolute;
       width: 60px;
       height: 60px;
-      background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAAAo0r9XAAAAllBMVEUAAAD///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9zqELgAAAAMHRSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKC0uLzFJY20AAABoSURBVEjH7dSxDoAgDIXhIh4s+f//Z6OQCg6SKaHVXtT3WxrS3rAfw2IRAhISiW0BQzMJjVm0jQXnyl68INaK1e0aJ9+9ivXuJ6HrfhtV6HU+7zFbX8gXxva5L5yl36u5R+W6PCFyaPNdfCmAAAAAElFTkSuQmCC") no-repeat center/contain;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
       pointer-events: none;
+      /* Фотка шахеда */
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Drone_icon.svg/1024px-Drone_icon.svg.png');
+      /* можно заменить на любую другую ссылку с прозрачным фоном */
     }
     .explosion {
       position: absolute;
@@ -59,6 +70,41 @@
       border: none;
       cursor: pointer;
       z-index: 10;
+      color: #000;
+      border-radius: 8px;
+    }
+
+    /* Панель выбора оружия снизу */
+    #weaponPanel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background-color: #111;
+      border-top: 2px solid #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      box-sizing: border-box;
+      z-index: 20;
+      color: white;
+      user-select: none;
+    }
+    .weapon-btn {
+      background-color: #333;
+      border: 2px solid #555;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .weapon-btn.selected {
+      background-color: orange;
+      border-color: yellow;
+      color: black;
     }
   </style>
 </head>
@@ -66,13 +112,35 @@
   <button id="startBtn">Начать бой</button>
   <div id="battlefield" style="display:none;"></div>
 
+  <!-- Панель оружия -->
+  <div id="weaponPanel" style="display:none;">
+    <div class="weapon-btn selected" data-weapon="shahed">Шахед</div>
+    <!-- Можно добавить другие оружия -->
+  </div>
+
   <script>
     const battlefield = document.getElementById('battlefield');
     const startBtn = document.getElementById('startBtn');
+    const weaponPanel = document.getElementById('weaponPanel');
+    const weaponButtons = document.querySelectorAll('.weapon-btn');
+
+    let selectedWeapon = 'shahed'; // текущий выбранный "шахед"
+
+    // Обработка выбора оружия (для расширения)
+    weaponButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        weaponButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedWeapon = btn.dataset.weapon;
+        // Здесь можно добавить логику для смены оружия
+        // Пока у нас только шахед, так что это просто визуально
+      });
+    });
 
     startBtn.onclick = () => {
       startBtn.style.display = 'none';
       battlefield.style.display = 'block';
+      weaponPanel.style.display = 'flex';
       spawnCities();
     };
 
@@ -81,7 +149,7 @@
         const city = document.createElement('div');
         city.className = 'city';
         const x = Math.random() * (window.innerWidth - 30);
-        const y = Math.random() * (window.innerHeight - 30);
+        const y = Math.random() * (window.innerHeight - 30 - 80); // не заезжать на панель оружия
         city.style.left = x + 'px';
         city.style.top = y + 'px';
         battlefield.appendChild(city);
@@ -89,44 +157,53 @@
     }
 
     battlefield.onclick = (e) => {
-      const drone = document.createElement('div');
-      drone.className = 'drone';
-      drone.style.left = '50%';
-      drone.style.top = '100%';
-      battlefield.appendChild(drone);
+      // Проверяем, что клик внутри battlefield, но не на панели оружия
+      if (e.clientY > window.innerHeight - 80) return;
 
-      const targetX = e.clientX;
-      const targetY = e.clientY;
+      if (selectedWeapon === 'shahed') {
+        const drone = document.createElement('div');
+        drone.className = 'drone';
 
-      const duration = 1000;
-      const startX = window.innerWidth / 2;
-      const startY = window.innerHeight;
-      const deltaX = targetX - startX;
-      const deltaY = targetY - startY;
-      const startTime = performance.now();
+        // старт снизу по центру
+        const startX = window.innerWidth / 2;
+        const startY = window.innerHeight - 80; // чуть выше панели оружия
 
-      function animate(time) {
-        const elapsed = time - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const currentX = startX + deltaX * progress;
-        const currentY = startY + deltaY * progress;
-        drone.style.left = currentX + 'px';
-        drone.style.top = currentY + 'px';
+        drone.style.left = (startX - 30) + 'px'; // -30 чтобы центрировать по ширине (60/2)
+        drone.style.top = startY + 'px';
+        battlefield.appendChild(drone);
 
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          battlefield.removeChild(drone);
-          const explosion = document.createElement('div');
-          explosion.className = 'explosion';
-          explosion.style.left = (targetX - 30) + 'px';
-          explosion.style.top = (targetY - 30) + 'px';
-          battlefield.appendChild(explosion);
-          setTimeout(() => battlefield.removeChild(explosion), 500);
+        const targetX = e.clientX;
+        const targetY = e.clientY;
+
+        const duration = 1000;
+        const deltaX = targetX - startX;
+        const deltaY = targetY - startY;
+        const startTime = performance.now();
+
+        function animate(time) {
+          const elapsed = time - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const currentX = startX + deltaX * progress;
+          const currentY = startY + deltaY * progress;
+          drone.style.left = (currentX - 30) + 'px';
+          drone.style.top = (currentY - 30) + 'px';
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            battlefield.removeChild(drone);
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = (targetX - 30) + 'px';
+            explosion.style.top = (targetY - 30) + 'px';
+            battlefield.appendChild(explosion);
+            setTimeout(() => battlefield.removeChild(explosion), 500);
+          }
         }
-      }
 
-      requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
+      }
+      // Можно добавить else if для других оружий
     };
   </script>
 </body>
