@@ -17,7 +17,7 @@
       width: 100vw; height: 100vh;
       background: linear-gradient(to right, blue 50%, red 50%);
       cursor: default;
-      padding-bottom: 100px; /* место для меню и иконок сверху */
+      padding-bottom: 100px; /* место для меню */
       box-sizing: border-box;
     }
     .city {
@@ -61,33 +61,6 @@
       color: #000;
       border-radius: 8px;
     }
-    /* Блок с иконками сверху */
-    #weaponIcons {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 60px;
-      z-index: 30;
-      user-select: none;
-      align-items: center;
-    }
-    #weaponIcons .icon-wrapper {
-      text-align: center;
-      color: #ddd;
-      font-weight: bold;
-      font-size: 14px;
-      font-family: Arial, sans-serif;
-    }
-    #weaponIcons img {
-      width: 50px;
-      height: 50px;
-      object-fit: contain;
-      margin-bottom: 4px;
-      filter: drop-shadow(0 0 2px black);
-    }
-    /* Меню выбора оружия снизу */
     #weaponPanel {
       position: fixed;
       bottom: 20px;
@@ -160,22 +133,9 @@
   <button id="startBtn">Начать бой</button>
   <div id="battlefield" style="display:none;"></div>
 
-  <!-- Иконки сверху -->
-  <div id="weaponIcons" style="display:none;">
-    <div class="icon-wrapper">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Missile_icon_right.svg/120px-Missile_icon_right.svg.png" alt="Шахед" />
-      <div>Шахед</div>
-    </div>
-    <div class="icon-wrapper">
-      <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Ракета" />
-      <div>Ракета</div>
-    </div>
-  </div>
-
-  <!-- Меню выбора -->
   <div id="weaponPanel" style="display:none;">
     <div class="weapon-btn selected" data-weapon="shahed" title="Шахед">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Missile_icon_right.svg/120px-Missile_icon_right.svg.png" alt="Шахед" />
+      <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTR1ApeuEnozjK1xuvfmWoX4eY6gkg_5JuPvG02npFa_1Hs9SDl" alt="Шахед" />
       Шахед
     </div>
     <div class="weapon-btn" data-weapon="rocket" title="Ракета">
@@ -188,7 +148,6 @@
     const battlefield = document.getElementById('battlefield');
     const startBtn = document.getElementById('startBtn');
     const weaponPanel = document.getElementById('weaponPanel');
-    const weaponIcons = document.getElementById('weaponIcons');
     const weaponButtons = document.querySelectorAll('.weapon-btn');
 
     let selectedWeapon = 'shahed';
@@ -207,7 +166,6 @@
       startBtn.style.display = 'none';
       battlefield.style.display = 'block';
       weaponPanel.style.display = 'flex';
-      weaponIcons.style.display = 'flex';
       spawnCities();
     };
 
@@ -244,7 +202,7 @@
     }
 
     battlefield.onclick = (e) => {
-      if (e.clientY > window.innerHeight - 60) return; // не запускать с меню
+      if (e.clientY > window.innerHeight - 100) return; // не запускать с меню
       if (!canShoot) return;
 
       const btn = document.querySelector('.weapon-btn.selected');
@@ -264,7 +222,7 @@
       drone.className = 'drone';
 
       if (selectedWeapon === 'shahed') {
-        drone.style.backgroundImage = `url("https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Missile_icon_right.svg/120px-Missile_icon_right.svg.png")`;
+        drone.style.backgroundImage = `url("https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTR1ApeuEnozjK1xuvfmWoX4eY6gkg_5JuPvG02npFa_1Hs9SDl")`;
       } else if (selectedWeapon === 'rocket') {
         drone.style.backgroundImage = `url("https://cdn-icons-png.flaticon.com/512/622/622669.png")`;
       }
