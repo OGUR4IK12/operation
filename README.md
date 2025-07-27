@@ -17,7 +17,7 @@
       width: 100vw; height: 100vh;
       background: linear-gradient(to right, blue 50%, red 50%);
       cursor: default;
-      padding-bottom: 60px; /* место для меню */
+      padding-bottom: 100px; /* место для меню и иконок сверху */
       box-sizing: border-box;
     }
     .city {
@@ -61,6 +61,35 @@
       color: #000;
       border-radius: 8px;
     }
+
+    /* Блок с иконками сверху */
+    #weaponIcons {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 60px;
+      z-index: 30;
+      user-select: none;
+      align-items: center;
+    }
+    #weaponIcons .icon-wrapper {
+      text-align: center;
+      color: #ddd;
+      font-weight: bold;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    }
+    #weaponIcons img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 0 2px black);
+    }
+
+    /* Меню выбора оружия снизу */
     #weaponPanel {
       position: fixed;
       bottom: 20px;
@@ -111,6 +140,7 @@
       user-select: none;
       margin-bottom: 4px;
       flex-shrink: 0;
+      object-fit: contain;
     }
     .weapon-btn .cooldown {
       position: absolute;
@@ -132,13 +162,26 @@
   <button id="startBtn">Начать бой</button>
   <div id="battlefield" style="display:none;"></div>
 
+  <!-- Иконки сверху -->
+  <div id="weaponIcons" style="display:none;">
+    <div class="icon-wrapper">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Missile_icon_right.svg/120px-Missile_icon_right.svg.png" alt="Шахед" />
+      <div>Шахед</div>
+    </div>
+    <div class="icon-wrapper">
+      <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Ракета" />
+      <div>Ракета</div>
+    </div>
+  </div>
+
+  <!-- Меню выбора -->
   <div id="weaponPanel" style="display:none;">
     <div class="weapon-btn selected" data-weapon="shahed" title="Шахед">
-      <img src="https://lens.usercontent.google.com/image?vsrid=CLCEycKIv4-KwAEQAhgBIiRlNDdjNTlkZC0wYTkzLTRjNDItYTY0Ny0yNzc1NDMwZTlhZDMyBiICbHUoAzi6zPKK792OAw&gsessionid=q60hVI_hkxv5QuT8fpYVMOP_Jp9tqVvgCzhHGUryASSmDANL5fykdg" alt="Шахед" />
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Missile_icon_right.svg/120px-Missile_icon_right.svg.png" alt="Шахед" />
       Шахед
     </div>
     <div class="weapon-btn" data-weapon="rocket" title="Ракета">
-      <img src="https://st2.depositphotos.com/3649089/6377/i/600/depositphotos_63771429-stock-photo-missile.jpg" alt="Ракета" />
+      <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Ракета" />
       Ракета
     </div>
   </div>
@@ -147,6 +190,7 @@
     const battlefield = document.getElementById('battlefield');
     const startBtn = document.getElementById('startBtn');
     const weaponPanel = document.getElementById('weaponPanel');
+    const weaponIcons = document.getElementById('weaponIcons');
     const weaponButtons = document.querySelectorAll('.weapon-btn');
 
     let selectedWeapon = 'shahed';
@@ -165,6 +209,7 @@
       startBtn.style.display = 'none';
       battlefield.style.display = 'block';
       weaponPanel.style.display = 'flex';
+      weaponIcons.style.display = 'flex';
       spawnCities();
     };
 
@@ -173,7 +218,7 @@
         const city = document.createElement('div');
         city.className = 'city';
         const x = Math.random() * (window.innerWidth - 30);
-        const y = Math.random() * (window.innerHeight - 30 - 60);
+        const y = Math.random() * (window.innerHeight - 30 - 100);
         city.style.left = x + 'px';
         city.style.top = y + 'px';
         battlefield.appendChild(city);
@@ -206,8 +251,7 @@
 
       const btn = document.querySelector('.weapon-btn.selected');
 
-      // Начальная позиция — центр левой половины экрана по горизонтали,
-      // центр экрана по вертикали:
+      // Старт с центра синей части (1/4 ширины, по центру высоты)
       const startX = window.innerWidth / 4;
       const startY = window.innerHeight / 2;
 
@@ -215,7 +259,6 @@
       const targetY = e.clientY;
 
       const duration = 2000;
-
       const deltaX = targetX - startX;
       const deltaY = targetY - startY;
 
@@ -223,12 +266,11 @@
       drone.className = 'drone';
 
       if (selectedWeapon === 'shahed') {
-        drone.style.backgroundImage = `url("https://lens.usercontent.google.com/image?vsrid=CLCEycKIv4-KwAEQAhgBIiRlNDdjNTlkZC0wYTkzLTRjNDItYTY0Ny0yNzc1NDMwZTlhZDMyBiICbHUoAzi6zPKK792OAw&gsessionid=q60hVI_hkxv5QuT8fpYVMOP_Jp9tqVvgCzhHGUryASSmDANL5fykdg")`;
+        drone.style.backgroundImage = `url("https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Missile_icon_right.svg/120px-Missile_icon_right.svg.png")`;
       } else if (selectedWeapon === 'rocket') {
-        drone.style.backgroundImage = `url("https://st2.depositphotos.com/3649089/6377/i/600/depositphotos_63771429-stock-photo-missile.jpg")`;
+        drone.style.backgroundImage = `url("https://cdn-icons-png.flaticon.com/512/622/622669.png")`;
       }
 
-      // Центруем изображение по стартовой точке (ширина/2 и высота/2 = 30)
       drone.style.left = (startX - 30) + 'px';
       drone.style.top = (startY - 30) + 'px';
 
