@@ -20,9 +20,8 @@
       width: 100vw;
       height: 100vh;
       background: linear-gradient(to right, red 50%, blue 50%);
-      cursor: default; /* обычный курсор */
-      overflow: hidden;
-      padding-bottom: 80px; /* место для панели оружия */
+      cursor: default;
+      padding-bottom: 100px; /* отступ для меню */
       box-sizing: border-box;
     }
     .city {
@@ -41,9 +40,6 @@
       background-repeat: no-repeat;
       background-position: center;
       pointer-events: none;
-      /* Фотка шахеда */
-      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Drone_icon.svg/1024px-Drone_icon.svg.png');
-      /* можно заменить на любую другую ссылку с прозрачным фоном */
     }
     .explosion {
       position: absolute;
@@ -74,37 +70,47 @@
       border-radius: 8px;
     }
 
-    /* Панель выбора оружия снизу */
+    /* Центрированное меню оружия снизу */
     #weaponPanel {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 80px;
+      bottom: 20px; /* немного отступ сверху от нижнего края */
+      left: 50%;
+      transform: translateX(-50%);
       background-color: #111;
-      border-top: 2px solid #444;
+      border: 2px solid #444;
+      border-radius: 12px;
+      padding: 10px 20px;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 20px;
       box-sizing: border-box;
       z-index: 20;
-      color: white;
       user-select: none;
+      width: 160px; /* узкая по ширине */
+      justify-content: center;
     }
     .weapon-btn {
       background-color: #333;
       border: 2px solid #555;
-      padding: 10px 20px;
-      border-radius: 6px;
+      padding: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: bold;
       transition: background-color 0.3s, border-color 0.3s;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .weapon-btn.selected {
       background-color: orange;
       border-color: yellow;
-      color: black;
+    }
+    .weapon-btn img {
+      max-width: 50px;
+      max-height: 50px;
+      pointer-events: none;
+      user-select: none;
     }
   </style>
 </head>
@@ -112,10 +118,12 @@
   <button id="startBtn">Начать бой</button>
   <div id="battlefield" style="display:none;"></div>
 
-  <!-- Панель оружия -->
+  <!-- Узкое меню оружия по центру снизу -->
   <div id="weaponPanel" style="display:none;">
-    <div class="weapon-btn selected" data-weapon="shahed">Шахед</div>
-    <!-- Можно добавить другие оружия -->
+    <div class="weapon-btn selected" data-weapon="shahed" title="Шахед">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Drone_icon.svg/1024px-Drone_icon.svg.png" alt="Шахед" />
+    </div>
+    <!-- Можно добавить другие оружия здесь -->
   </div>
 
   <script>
@@ -124,16 +132,13 @@
     const weaponPanel = document.getElementById('weaponPanel');
     const weaponButtons = document.querySelectorAll('.weapon-btn');
 
-    let selectedWeapon = 'shahed'; // текущий выбранный "шахед"
+    let selectedWeapon = 'shahed';
 
-    // Обработка выбора оружия (для расширения)
     weaponButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         weaponButtons.forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedWeapon = btn.dataset.weapon;
-        // Здесь можно добавить логику для смены оружия
-        // Пока у нас только шахед, так что это просто визуально
       });
     });
 
@@ -149,7 +154,7 @@
         const city = document.createElement('div');
         city.className = 'city';
         const x = Math.random() * (window.innerWidth - 30);
-        const y = Math.random() * (window.innerHeight - 30 - 80); // не заезжать на панель оружия
+        const y = Math.random() * (window.innerHeight - 30 - 100); // не заходить под меню
         city.style.left = x + 'px';
         city.style.top = y + 'px';
         battlefield.appendChild(city);
@@ -157,18 +162,18 @@
     }
 
     battlefield.onclick = (e) => {
-      // Проверяем, что клик внутри battlefield, но не на панели оружия
-      if (e.clientY > window.innerHeight - 80) return;
+      // Игнорируем клики по меню
+      if (e.clientY > window.innerHeight - 100) return;
 
       if (selectedWeapon === 'shahed') {
         const drone = document.createElement('div');
         drone.className = 'drone';
+        drone.style.backgroundImage = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Drone_icon.svg/1024px-Drone_icon.svg.png')";
 
-        // старт снизу по центру
         const startX = window.innerWidth / 2;
-        const startY = window.innerHeight - 80; // чуть выше панели оружия
+        const startY = window.innerHeight - 100;
 
-        drone.style.left = (startX - 30) + 'px'; // -30 чтобы центрировать по ширине (60/2)
+        drone.style.left = (startX - 30) + 'px';
         drone.style.top = startY + 'px';
         battlefield.appendChild(drone);
 
@@ -203,7 +208,6 @@
 
         requestAnimationFrame(animate);
       }
-      // Можно добавить else if для других оружий
     };
   </script>
 </body>
