@@ -61,7 +61,6 @@
       color: #000;
       border-radius: 8px;
     }
-
     /* Блок с иконками сверху */
     #weaponIcons {
       position: fixed;
@@ -88,7 +87,6 @@
       margin-bottom: 4px;
       filter: drop-shadow(0 0 2px black);
     }
-
     /* Меню выбора оружия снизу */
     #weaponPanel {
       position: fixed;
