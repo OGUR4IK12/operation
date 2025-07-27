@@ -21,7 +21,7 @@
       height: 100vh;
       background: linear-gradient(to right, red 50%, blue 50%);
       cursor: default;
-      padding-bottom: 100px; /* отступ для меню */
+      padding-bottom: 100px;
       box-sizing: border-box;
     }
     .city {
@@ -70,10 +70,9 @@
       border-radius: 8px;
     }
 
-    /* Центрированное меню оружия снизу */
     #weaponPanel {
       position: fixed;
-      bottom: 20px; /* немного отступ сверху от нижнего края */
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       background-color: #111;
@@ -86,7 +85,7 @@
       box-sizing: border-box;
       z-index: 20;
       user-select: none;
-      width: 160px; /* узкая по ширине */
+      width: 160px;
       justify-content: center;
     }
     .weapon-btn {
@@ -101,15 +100,38 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: center;
     }
     .weapon-btn.selected {
       background-color: orange;
       border-color: yellow;
+      color: black;
     }
     .weapon-btn img {
       max-width: 50px;
       max-height: 50px;
       pointer-events: none;
+      user-select: none;
+    }
+    /* Отображение кд поверх кнопки */
+    .weapon-btn .cooldown {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: yellow;
       user-select: none;
     }
   </style>
@@ -118,12 +140,11 @@
   <button id="startBtn">Начать бой</button>
   <div id="battlefield" style="display:none;"></div>
 
-  <!-- Узкое меню оружия по центру снизу -->
   <div id="weaponPanel" style="display:none;">
     <div class="weapon-btn selected" data-weapon="shahed" title="Шахед">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Drone_icon.svg/1024px-Drone_icon.svg.png" alt="Шахед" />
+      <img src="https://i.postimg.cc/Z5tWNQ9Y/shahed.png" alt="Шахед" />
+      <!-- сюда будет таймер кд -->
     </div>
-    <!-- Можно добавить другие оружия здесь -->
   </div>
 
   <script>
@@ -133,9 +154,11 @@
     const weaponButtons = document.querySelectorAll('.weapon-btn');
 
     let selectedWeapon = 'shahed';
+    let canShoot = true; // флаг кд
 
     weaponButtons.forEach(btn => {
       btn.addEventListener('click', () => {
+        if (!canShoot) return; // нельзя менять оружие пока кд
         weaponButtons.forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedWeapon = btn.dataset.weapon;
@@ -154,21 +177,43 @@
         const city = document.createElement('div');
         city.className = 'city';
         const x = Math.random() * (window.innerWidth - 30);
-        const y = Math.random() * (window.innerHeight - 30 - 100); // не заходить под меню
+        const y = Math.random() * (window.innerHeight - 30 - 100);
         city.style.left = x + 'px';
         city.style.top = y + 'px';
         battlefield.appendChild(city);
       }
     }
 
+    function setCooldown(btn, seconds) {
+      canShoot = false;
+
+      // Создаём элемент с таймером
+      const cdElem = document.createElement('div');
+      cdElem.className = 'cooldown';
+      cdElem.textContent = seconds;
+      btn.appendChild(cdElem);
+
+      let timeLeft = seconds;
+      const interval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          cdElem.textContent = timeLeft;
+        } else {
+          clearInterval(interval);
+          btn.removeChild(cdElem);
+          canShoot = true;
+        }
+      }, 1000);
+    }
+
     battlefield.onclick = (e) => {
-      // Игнорируем клики по меню
-      if (e.clientY > window.innerHeight - 100) return;
+      if (e.clientY > window.innerHeight - 100) return; // не стрелять из меню
+      if (!canShoot) return; // ждём кд
 
       if (selectedWeapon === 'shahed') {
         const drone = document.createElement('div');
         drone.className = 'drone';
-        drone.style.backgroundImage = "url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Drone_icon.svg/1024px-Drone_icon.svg.png')";
+        drone.style.backgroundImage = "url('https://i.postimg.cc/Z5tWNQ9Y/shahed.png')";
 
         const startX = window.innerWidth / 2;
         const startY = window.innerHeight - 100;
@@ -207,6 +252,10 @@
         }
 
         requestAnimationFrame(animate);
+
+        // Запускаем кд на 3 секунды на кнопке шахеда
+        const btn = document.querySelector('.weapon-btn.selected');
+        setCooldown(btn, 3);
       }
     };
   </script>
